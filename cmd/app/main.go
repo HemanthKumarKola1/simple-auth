@@ -1,20 +1,58 @@
 package main
 
 import (
+	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/go-redis/redis"
 	"github.com/gorilla/mux"
-	"hemanth.kola/simple-auth/handlers"
+	_ "github.com/lib/pq"
+	cache "hemanth.kola/simple-auth/internal/cache"
+	"hemanth.kola/simple-auth/internal/handlers"
+	usecase "hemanth.kola/simple-auth/internal/middleware"
+	repo "hemanth.kola/simple-auth/internal/repo"
 )
 
 func main() {
 
-	server := handlers.NewAuthServer()
+	dbConn, err := sql.Open("postgres", "postgresql://root:secret@localhost:5432/users?sslmode=disable")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer dbConn.Close()
+
+	_, err = dbConn.Exec("CREATE TABLE users (username TEXT PRIMARY KEY, password TEXT)")
+	if err != nil {
+		fmt.Println("Error creating table:", err)
+	} else {
+		fmt.Println("Table created successfully")
+	}
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+
+	_, err = rdb.Ping().Result()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rtc := cache.NewRevokedTokensCache(rdb)
+
+	userRepo := repo.NewRepository(dbConn)
+	authUsecase := usecase.NewAuthUseCase(userRepo, rtc)
+	server := handlers.NewAuthServer(authUsecase)
+
 	r := mux.NewRouter()
-	r.HandleFunc("/singup", server.Signup).Methods(http.MethodPost)
+	r.HandleFunc("/signup", server.Signup).Methods(http.MethodPost)
 	r.HandleFunc("/login", server.Login).Methods(http.MethodPost)
 	r.HandleFunc("/refresh", server.RefreshJwt).Methods(http.MethodGet)
 	r.HandleFunc("/revoke", server.Revoke).Methods(http.MethodPost)
 	log.Fatal(http.ListenAndServe(":8080", r))
+
+	dbConn.Exec("DROP TABLE IF EXISTS users")
 }

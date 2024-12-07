@@ -4,8 +4,9 @@ services:
   db:
     image: postgres:latest
     environment:
-      POSTGRES_PASSWORD: your_postgres_password
-      POSTGRES_DB: your_database_name
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: users
     ports:
       - "5432:5432"
 
@@ -22,5 +23,5 @@ services:
       - db
       - redis
     environment:
-      POSTGRES_CONN_STRING: postgres://user:password@db:5432/your_database_name
+      POSTGRES_CONN_STRING: postgres://user:password@db:5432/users
       REDIS_ADDR: redis:6379

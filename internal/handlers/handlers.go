@@ -2,11 +2,12 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
-	"hemanth.kola/simple-auth/models"
-	usecase "hemanth.kola/simple-auth/usecase/auth"
-	"hemanth.kola/simple-auth/utils"
+	db "hemanth.kola/simple-auth/internal/db/sqlc"
+	usecase "hemanth.kola/simple-auth/internal/middleware"
+	"hemanth.kola/simple-auth/internal/utils"
 )
 
 type authServer struct {
@@ -20,18 +21,18 @@ type AuthServer interface {
 	Revoke(w http.ResponseWriter, r *http.Request)
 }
 
-func NewAuthServer() AuthServer {
-	return &authServer{}
+func NewAuthServer(authUsecase usecase.Auth) AuthServer {
+	return &authServer{authenticateUsecase: authUsecase}
 }
 
 func (a *authServer) Signup(w http.ResponseWriter, r *http.Request) {
-	var newUser models.User
+	var newUser db.User
 	err := json.NewDecoder(r.Body).Decode(&newUser)
 	if err != nil {
 		http.Error(w, "unable to decode request body", http.StatusBadRequest)
 		return
 	}
-	err = a.authenticateUsecase.SignUp(&newUser)
+	err = a.authenticateUsecase.SignUp(newUser)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -40,7 +41,7 @@ func (a *authServer) Signup(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *authServer) Login(w http.ResponseWriter, r *http.Request) {
-	var user models.User
+	var user db.User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		http.Error(w, "unable to decode request body", http.StatusBadRequest)
@@ -62,7 +63,7 @@ func (a *authServer) Login(w http.ResponseWriter, r *http.Request) {
 
 func (a *authServer) RefreshJwt(w http.ResponseWriter, r *http.Request) {
 
-	jwtToken, err := utils.ExtractJWT(r)
+	jwtToken, err := utils.ExtractJWTFromHeader(r)
 	if err != nil {
 		http.Error(w, "Invalid authorization header", http.StatusUnauthorized)
 		return
@@ -83,9 +84,31 @@ func (a *authServer) RefreshJwt(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *authServer) Revoke(w http.ResponseWriter, r *http.Request) {
-	jwtToken, err := utils.ExtractJWT(r)
+	token, err := utils.ExtractJWTFromHeader(r)
 	if err != nil {
 		http.Error(w, "error while extracting jwt from header"+err.Error(), http.StatusBadRequest)
+		return
 	}
-	a.authenticateUsecase.RevokeJwt(jwtToken)
+	jwtToken, err := utils.ValidateJWT(token)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	//TODO: check if the current token is revoked already.
+
+	claims, err := utils.GetClaims(jwtToken)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	expiry := claims["exp"].(float64)
+
+	if err := a.authenticateUsecase.RevokeJwt(token, expiry); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "token revoked successfully")
 }
