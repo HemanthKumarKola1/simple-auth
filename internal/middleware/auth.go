@@ -19,7 +19,7 @@ type Auth interface {
 	SignUp(newUser db.User) error
 	Login(user db.User) (string, error)
 	RefreshJwt(jwtToken string) (string, error)
-	RevokeJwt(token string, ttl float64) error
+	RevokeJwt(token string) error
 }
 
 type authUsecase struct {
@@ -74,14 +74,15 @@ func (a *authUsecase) RefreshJwt(jwtToken string) (string, error) {
 		return "", errors.New("invalid jwt provided")
 	}
 
-	val, err := a.revokeTokensCache.Get(jwtToken)
+	_, err = a.revokeTokensCache.Get(jwtToken)
 	if err == nil {
 		return "", errors.New("invalid jwt provided")
 	} else if err != redis.Nil {
 		return "", errors.New("redis is unavailable")
 	}
 
-	fmt.Println(val)
+	a.RevokeJwt(jwtToken)
+
 	claims := token.Claims.(jwt.MapClaims)
 
 	expiry := claims["exp"].(float64)
@@ -98,6 +99,6 @@ func (a *authUsecase) RefreshJwt(jwtToken string) (string, error) {
 	return accessToken, nil
 }
 
-func (a *authUsecase) RevokeJwt(token string, ttl float64) error {
+func (a *authUsecase) RevokeJwt(token string) error {
 	return a.revokeTokensCache.SetWithTTL(token, "revoked", 24*time.Hour)
 }

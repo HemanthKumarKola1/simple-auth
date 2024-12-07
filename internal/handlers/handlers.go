@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	db "github.com/HemanthKumarKola1/simple-auth/internal/db/sqlc"
 	usecase "github.com/HemanthKumarKola1/simple-auth/internal/middleware"
 	"github.com/HemanthKumarKola1/simple-auth/internal/utils"
+	"github.com/golang-jwt/jwt"
 )
 
 type authServer struct {
@@ -84,27 +86,26 @@ func (a *authServer) RefreshJwt(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *authServer) Revoke(w http.ResponseWriter, r *http.Request) {
-	token, err := utils.ExtractJWTFromHeader(r)
+	jwtToken, err := utils.ExtractJWTFromHeader(r)
 	if err != nil {
 		http.Error(w, "error while extracting jwt from header"+err.Error(), http.StatusBadRequest)
 		return
 	}
-	jwtToken, err := utils.ValidateJWT(token)
+	token, err := utils.ValidateJWT(jwtToken)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	//TODO: check if the current token is revoked already.
+	claims := token.Claims.(jwt.MapClaims)
 
-	claims, err := utils.GetClaims(jwtToken)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
 	expiry := claims["exp"].(float64)
+	if expiry < float64(time.Now().Unix()) {
+		http.Error(w, "token expired", http.StatusUnauthorized)
+		return
+	}
 
-	if err := a.authenticateUsecase.RevokeJwt(token, expiry); err != nil {
+	if err := a.authenticateUsecase.RevokeJwt(jwtToken); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

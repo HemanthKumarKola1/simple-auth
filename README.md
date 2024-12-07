@@ -28,9 +28,9 @@ Steps to start the application:
 4. revoke: use the fetched jwt to revoke
 
 > curl --location --request POST 'http://localhost:8080/revoke' \
---header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzM2MjUwNTAsInVzZXJuYW1lIjoibWF5YmUxMjMifQ.r_-JnCua20FhO7L8jN9jXesuI0FPB0ySbZ7EHzY7s_w'
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzM2NjUyMjUsInVzZXJuYW1lIjoibWF5YmUxMjMifQ.Q2Xj_CTAYrel3Z6FSyyMoLhVyWr0D6nhUlYo4bnMZpA'
 
 5. refresh: you will not be able to refresh with revoked jwt, use a jwt without revoking to refresh
 
 > curl --location 'http://localhost:8080/refresh' \
---header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzM2MjUwNTAsInVzZXJuYW1lIjoibWF5YmUxMjMifQ.r_-JnCua20FhO7L8jN9jXesuI0FPB0ySbZ7EHzY7s_w'
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzM2NjUyNzYsInVzZXJuYW1lIjoibWF5YmUxMjMifQ.NUTOP-BQ1hiXgwEWY0MkSbC_ceNJ_aQnylJabN-6bpI'
