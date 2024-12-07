@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
-	cache "github.com/HemanthKumarKola1/simple-auth/internal/cache"
+	"github.com/HemanthKumarKola1/simple-auth/internal/cache"
 	"github.com/HemanthKumarKola1/simple-auth/internal/handlers"
-	usecase "github.com/HemanthKumarKola1/simple-auth/internal/middleware"
-	repo "github.com/HemanthKumarKola1/simple-auth/internal/repo"
+	middleware "github.com/HemanthKumarKola1/simple-auth/internal/middleware"
+	"github.com/HemanthKumarKola1/simple-auth/internal/repo"
 	"github.com/go-redis/redis"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -17,21 +18,17 @@ import (
 
 func main() {
 
-	dbConn, err := sql.Open("postgres", "postgresql://root:secret@localhost:5432/users?sslmode=disable")
+	time.Sleep(5 * time.Second)
+
+	pgsqlUrl := "postgresql://root:secret@db:5432/users?sslmode=disable"
+	dbConn, err := sql.Open("postgres", pgsqlUrl)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer dbConn.Close()
 
-	_, err = dbConn.Exec("CREATE TABLE users (username TEXT PRIMARY KEY, password TEXT)")
-	if err != nil {
-		fmt.Println("Error creating table:", err)
-	} else {
-		fmt.Println("Table created successfully")
-	}
-
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
+		Addr:     "redis:6379",
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
@@ -41,10 +38,17 @@ func main() {
 		log.Fatal(err)
 	}
 
+	_, err = dbConn.Exec("CREATE TABLE users (username TEXT PRIMARY KEY, password TEXT)")
+	if err != nil {
+		fmt.Println("Error creating table:", err)
+	} else {
+		fmt.Println("Table created successfully")
+	}
+
 	rtc := cache.NewRevokedTokensCache(rdb)
 
 	userRepo := repo.NewRepository(dbConn)
-	authUsecase := usecase.NewAuthUseCase(userRepo, rtc)
+	authUsecase := middleware.NewAuthUseCase(userRepo, rtc)
 	server := handlers.NewAuthServer(authUsecase)
 
 	r := mux.NewRouter()

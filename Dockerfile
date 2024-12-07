@@ -6,14 +6,16 @@ WORKDIR /app
 
 # Copy the source code and dependencies
 COPY go.mod go.sum ./
+COPY . .
 
 # Download dependencies
 RUN go mod download
 
-COPY cmd/app ./
+# Tiding the deps
+RUN go mod tidy
 
 # Build the application
-RUN go build -o main .
+RUN go build -o main ./cmd/app
 
 # Create a new image for the final application
 FROM alpine:latest
