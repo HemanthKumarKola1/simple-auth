@@ -16,8 +16,6 @@ func NewRevokedTokensCache(rdbClient *redis.Client) *RevokedTokensCache {
 }
 
 func (t *RevokedTokensCache) SetWithTTL(key string, value string, ttl time.Duration) error {
-	t.rdb.Set("hellow", "wassup", 0)
-	fmt.Println(key)
 	return t.rdb.SetNX(key, value, ttl).Err()
 }
 

@@ -18,7 +18,7 @@ import (
 
 func main() {
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(5 * time.Second) // to make the dependencies get up meanwhile
 
 	pgsqlUrl := "postgresql://root:secret@db:5432/users?sslmode=disable"
 	dbConn, err := sql.Open("postgres", pgsqlUrl)
@@ -57,6 +57,4 @@ func main() {
 	r.HandleFunc("/refresh", server.RefreshJwt).Methods(http.MethodGet)
 	r.HandleFunc("/revoke", server.Revoke).Methods(http.MethodPost)
 	log.Fatal(http.ListenAndServe(":8080", r))
-
-	dbConn.Exec("DROP TABLE IF EXISTS users")
 }
