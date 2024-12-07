@@ -1,5 +1,5 @@
 # Welcome to simple-auth!
-This is a simple golang application for simple authentication of users using postgres and redis.
+This is a golang application for simple authentication of users using postgres and redis.
 
 Steps to start the application:
 1. Clone the repo.
@@ -27,7 +27,7 @@ Steps to start the application:
 
 4. revoke: use the fetched jwt to revoke
 
-> curl --location --request POST 'http://localhost:8080/refresh' \
+> curl --location --request POST 'http://localhost:8080/revoke' \
 --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzM2MjUwNTAsInVzZXJuYW1lIjoibWF5YmUxMjMifQ.r_-JnCua20FhO7L8jN9jXesuI0FPB0ySbZ7EHzY7s_w'
 
 5. refresh: you will not be able to refresh with revoked jwt, use a jwt without revoking to refresh
