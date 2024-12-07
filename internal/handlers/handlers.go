@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	db "hemanth.kola/simple-auth/internal/db/sqlc"
-	usecase "hemanth.kola/simple-auth/internal/middleware"
-	"hemanth.kola/simple-auth/internal/utils"
+	db "github.com/HemanthKumarKola1/simple-auth/internal/db/sqlc"
+	usecase "github.com/HemanthKumarKola1/simple-auth/internal/middleware"
+	"github.com/HemanthKumarKola1/simple-auth/internal/utils"
 )
 
 type authServer struct {

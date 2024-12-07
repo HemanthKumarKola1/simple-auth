@@ -22,6 +22,6 @@ services:
     depends_on:
       - db
       - redis
-    environment:
-      POSTGRES_CONN_STRING: postgres://user:password@db:5432/users
-      REDIS_ADDR: redis:6379
+    # environment:
+    #   POSTGRES_CONN_STRING: postgres://user:password@db:5432/users
+    #   REDIS_ADDR: redis:6379

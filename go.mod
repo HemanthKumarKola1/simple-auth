@@ -1,9 +1,8 @@
-module hemanth.kola/simple-auth
+module github.com/HemanthKumarKola1/simple-auth
 
 go 1.20
 
 require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/gorilla/mux v1.8.1

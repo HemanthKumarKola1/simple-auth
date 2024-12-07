@@ -6,13 +6,13 @@ import (
 	"log"
 	"net/http"
 
+	cache "github.com/HemanthKumarKola1/simple-auth/internal/cache"
+	"github.com/HemanthKumarKola1/simple-auth/internal/handlers"
+	usecase "github.com/HemanthKumarKola1/simple-auth/internal/middleware"
+	repo "github.com/HemanthKumarKola1/simple-auth/internal/repo"
 	"github.com/go-redis/redis"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
-	cache "hemanth.kola/simple-auth/internal/cache"
-	"hemanth.kola/simple-auth/internal/handlers"
-	usecase "hemanth.kola/simple-auth/internal/middleware"
-	repo "hemanth.kola/simple-auth/internal/repo"
 )
 
 func main() {

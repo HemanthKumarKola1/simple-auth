@@ -6,10 +6,11 @@ WORKDIR /app
 
 # Copy the source code and dependencies
 COPY go.mod go.sum ./
-COPY cmd/app .
 
 # Download dependencies
 RUN go mod download
+
+COPY cmd/app ./
 
 # Build the application
 RUN go build -o main .

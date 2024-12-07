@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	db "hemanth.kola/simple-auth/internal/db/sqlc"
-	"hemanth.kola/simple-auth/internal/utils"
+	db "github.com/HemanthKumarKola1/simple-auth/internal/db/sqlc"
+	"github.com/HemanthKumarKola1/simple-auth/internal/utils"
 )
 
 type Repository struct {

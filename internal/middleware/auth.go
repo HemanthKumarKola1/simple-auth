@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"time"
 
+	cache "github.com/HemanthKumarKola1/simple-auth/internal/cache"
+	db "github.com/HemanthKumarKola1/simple-auth/internal/db/sqlc"
+	repo "github.com/HemanthKumarKola1/simple-auth/internal/repo"
+	"github.com/HemanthKumarKola1/simple-auth/internal/utils"
 	"github.com/go-redis/redis"
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
-	cache "hemanth.kola/simple-auth/internal/cache"
-	db "hemanth.kola/simple-auth/internal/db/sqlc"
-	repo "hemanth.kola/simple-auth/internal/repo"
-	"hemanth.kola/simple-auth/internal/utils"
 )
 
 type Auth interface {
