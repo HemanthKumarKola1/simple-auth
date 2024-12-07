@@ -56,5 +56,6 @@ func main() {
 	r.HandleFunc("/login", server.Login).Methods(http.MethodPost)
 	r.HandleFunc("/refresh", server.RefreshJwt).Methods(http.MethodGet)
 	r.HandleFunc("/revoke", server.Revoke).Methods(http.MethodPost)
+	r.HandleFunc("/test", server.TestAuth).Methods(http.MethodGet)
 	log.Fatal(http.ListenAndServe(":8080", r))
 }

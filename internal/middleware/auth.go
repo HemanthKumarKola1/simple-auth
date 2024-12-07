@@ -20,6 +20,7 @@ type Auth interface {
 	Login(user db.User) (string, error)
 	RefreshJwt(jwtToken string) (string, error)
 	RevokeJwt(token string) error
+	IsRevoked(jwtToken string) error
 }
 
 type authUsecase struct {
@@ -101,4 +102,14 @@ func (a *authUsecase) RefreshJwt(jwtToken string) (string, error) {
 
 func (a *authUsecase) RevokeJwt(token string) error {
 	return a.revokeTokensCache.SetWithTTL(token, "revoked", 24*time.Hour)
+}
+
+func (a *authUsecase) IsRevoked(jwtToken string) error {
+	_, err := a.revokeTokensCache.Get(jwtToken)
+	if err == nil {
+		return errors.New(utils.ERROR_2)
+	} else if err != redis.Nil {
+		return errors.New("redis is unavailable")
+	}
+	return nil
 }
